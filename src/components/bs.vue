@@ -1,8 +1,8 @@
 <template>
   <main>
     <img src="../assets/logo.svg" width="100" class="logo" />
-    <form>
-      <input type="number" ref="bs" inputmode="numeric" pattern="[0-9]*" name="bloodsugar" v-model="mgdl" @keyup="calculateBloodsugar" placeholder="mg/dl" autofocus />
+    <form method="get" action="/">
+      <input type="number" ref="bs" inputmode="numeric" pattern="[0-9]*" name="mgdl" v-model="mgdl" @keyup="calculateBloodsugar" placeholder="mg/dl" autofocus />
       <select name="when" v-model="when" @change="calculateBloodsugar">
         <option value="fasting">Fasting</option>
         <option value="before">Before meal</option>
@@ -19,10 +19,13 @@
         <span>mg/dl</span>
       </div>
     </figure>
+    <input class="url" ref="url" name="url" v-bind:value="url" v-if="url"/>
   </main>
 </template>
 
 <script>
+import qs from 'query-string-parser'
+
 export default {
   name: 'bs',
   data () {
@@ -33,7 +36,26 @@ export default {
       status: '',
       fasting: { low: 0, high: 95 },
       before: { low: 70, high: 100 },
-      after: { low: 95, high: 140 }
+      after: { low: 95, high: 140 },
+      clip: false,
+      url: ''
+    }
+  },
+  mounted () {
+    const q = qs.parseQuery( window.location.search );
+    let when = q.when,
+        mgdl = q.mgdl;
+
+    if( when && ( when === 'fasting' || when === 'before' || when === 'after' ) ){
+      this.when = when;
+    }
+    
+    if( mgdl ){
+      this.mgdl = mgdl;
+    }
+
+    if( when || mgdl ){
+      this.calculateBloodsugar();
     }
   },
   methods: {
@@ -66,6 +88,8 @@ export default {
           this.status = 'bad';
         }
       }
+
+      this.url = `http://bs.timbenniks.nl/?mgdl=${this.mgdl}&when=${this.when}`;
     }
   }
 }
@@ -99,6 +123,15 @@ input {
 
 input:focus {
   outline: none;
+}
+
+input.url {
+  width: calc( 95% - 30px );
+  margin: 0.5em auto 0;
+  padding: 1em;
+  display: block;
+  float: none;
+  border: 1px solid #ccc;
 }
 
 select {
@@ -160,5 +193,17 @@ figure.results {
 .result.mgdl span {
   font-size: 0.3em;
   display: block;
+}
+
+button {
+  font-size: 13px;
+  margin: 1em auto;
+  display: block;
+  border: none;
+  background: none;
+}
+
+button span {
+  display: none;
 }
 </style>
