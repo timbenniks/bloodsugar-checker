@@ -194,16 +194,4 @@ figure.results {
   font-size: 0.3em;
   display: block;
 }
-
-button {
-  font-size: 13px;
-  margin: 1em auto;
-  display: block;
-  border: none;
-  background: none;
-}
-
-button span {
-  display: none;
-}
 </style>
